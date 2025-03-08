@@ -7,6 +7,7 @@
     "dev": "tsx cli/dev.ts",
     "verify": "tsx cli/verify.ts",
     "list": "tsx cli/list.ts",
+    "tsc": "tsc",
     "raport:json": "npm run raport:json:core && npm run raport:json:react",
     "raport:json:core": "vitest core-pro --run --silent --config=vitest.config.node.ts --no-coverage --pool=forks --poolOptions.forks.isolate=false --sequence.concurrent=true --reporter=json  --outputFile utils/progress/data/results-core.json || echo ''",
     "raport:json:react": "vitest react-pro --run --silent --config=vitest.config.react.ts --no-coverage --pool=forks --poolOptions.forks.isolate=false --sequence.concurrent=true --reporter=json  --outputFile utils/progress/data/results-react.json || echo ''",
