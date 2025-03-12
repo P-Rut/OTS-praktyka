@@ -21,7 +21,12 @@ type SMSNotification = {
   message: string;
 };
 
-type SystemNotification = { type: '' };
+type SystemNotification = {
+  type: 'system';
+  log: string;
+};
+
+// type SystemNotification = { type: '' };
 
 type Notification = EmailNotification | SMSNotification | SystemNotification;
 
@@ -29,7 +34,25 @@ type Notification = EmailNotification | SMSNotification | SystemNotification;
 export function getNotificationText(notification: Notification): string {
   if (notification.type === 'email') {
     return notification.content;
+  } else if (notification.type === 'sms') {
+    return notification.message;
+  } else if (notification.type === 'system') {
+    return notification.log;
+  } else {
+    return 'Unknown notification';
   }
+}
 
-  return ' ';
+//Szybka próbka ogrania tego Switchem just for fun / testy równie przechodzą
+export function getNotificationTextWithSwitch(notification: Notification): string {
+  switch (notification.type) {
+    case 'email':
+      return notification.content;
+    case 'sms':
+      return notification.message;
+    case 'system':
+      return notification.log;
+    default:
+      return 'Unknown notification';
+  }
 }
