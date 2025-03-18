@@ -2,6 +2,12 @@ interface Message {
   type: MessageType;
 }
 
+interface MessageMap {
+  orderCreated: OrderCreatedMessage;
+  orderCancelled: OrderCancelledMessage;
+}
+type MessageType = keyof MessageMap;
+
 interface Order {
   orderId: string;
   items: { productId: string; quantity: number }[];
@@ -17,19 +23,31 @@ export interface OrderCancelledMessage {
   payload: { orderId: string };
 }
 
-export class MessageBus {
-  private subscribers: any;
+type Orders = {
+  type: MessageType;
+  value: [];
+};
 
-  subscribe(type: any, subscriber: (message: any) => void): void {
-    throw new Error('Not implemented');
+export class MessageBus {
+  private subscribers: Partial<Record<MessageType, Array<(message: any) => void>>> = {};
+
+  subscribe<T extends MessageType>(type: T, subscriber: (message: MessageMap[T]) => void): void {
+    this.subscribers[type] = this.subscribers[type] || [];
+    this.subscribers[type].push(subscriber);
   }
 
-  publish(message: any): void {
-    throw new Error('Not implemented');
+  publish<T extends Message>(message: T): void {
+    const subs = this.subscribers[message.type as keyof MessageType];
+    if (subs) {
+      subs.forEach((f) => {
+        f(message);
+      });
+    }
   }
 }
 
 export class InventoryStockTracker {
+  private orders: Record<string, Order> = {};
   constructor(
     private bus: MessageBus,
     private stock: Record<string, number>,
@@ -38,7 +56,23 @@ export class InventoryStockTracker {
   }
 
   private subscribeToMessages(): void {
-    throw new Error('Not implemented');
+    this.bus.subscribe('orderCreated', (message: OrderCreatedMessage) => {
+      this.orders[message.payload.orderId] = message.payload;
+
+      message.payload.items.forEach((item) => {
+        this.stock[item.productId] = this.getStock(item.productId) - item.quantity;
+      });
+    });
+
+    this.bus.subscribe('orderCancelled', (message: OrderCancelledMessage) => {
+      const order = this.orders[message.payload.orderId];
+
+      order.items.forEach((item) => {
+        this.stock[item.productId] = this.getStock(item.productId) + item.quantity;
+      });
+
+      delete this.orders[message.payload.orderId];
+    });
   }
 
   getStock(productId: string): number {
