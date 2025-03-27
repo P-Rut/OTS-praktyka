@@ -4,6 +4,14 @@ type PagesMap = {
   contact: string;
 };
 
-type PagesAccess = {};
+type PagesAccess = {
+  [Prop in keyof PagesMap]: boolean;
+};
 
-export function checkAccess(map: PagesMap): PagesAccess {}
+export function checkAccess(map: PagesMap): PagesAccess {
+  const access = {} as PagesAccess;
+  Object.keys(map).forEach((key) => {
+    access[key] = true;
+  });
+  return access;
+}
